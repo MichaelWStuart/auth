@@ -9,6 +9,7 @@ var passportLocalMongoose = require('passport-local-mongoose'),
 
 mongoose.connect('mongodb://localhost/auth');
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(require('express-session')({
   secret: 'mellon',
@@ -30,6 +31,23 @@ app.get('/', function(req, res){
 app.get('/secret', function(req, res){
   res.render('secret')
 })
+
+app.get('/register', function(req, res){
+  res.render('register');
+});
+
+//user sign up
+app.post('/register', function(req, res){
+  User.register(new User({username: req.body.username}), req.body.password, function(err, user){
+    if (err){
+      console.log(err);
+      return res.render('register');
+    }
+    passport.authenticate('local')(req, res, function(){
+      res.redirect('/secret');
+    });
+  });
+});
 
 app.listen(3000, function(){
   console.log("serve's up fool");
